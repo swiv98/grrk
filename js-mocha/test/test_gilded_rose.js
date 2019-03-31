@@ -33,18 +33,18 @@ describe('Gilded Rose', function () {
     const defaultQuality = 5;
     const defaultShopInventory = () => [
         new TypedItem('Just some item', defaultSellIn, defaultQuality),
-        new ItemAgeingWell('Aged Brie', defaultSellIn, defaultQuality),
-        new ItemBackstagePass('Backstage passes to a TAFKAL80ETC concert', defaultSellIn, defaultQuality),
+        new ItemAgeingWell('Aged Brie by Edo', defaultSellIn, defaultQuality),
+        new ItemBackstagePass('Backstage passes to a concert', defaultSellIn, defaultQuality),
         new ItemLegendary('Sulfuras, Hand of Ragnaros', defaultSellIn, defaultQuality),
-        new ItemConjured('Conjured item - TODO', defaultSellIn, defaultQuality)
+        new ItemConjured('Conjured item you should not want', defaultSellIn, defaultQuality)
     ];
 
     const shopInventoryAllAtDueDate = () => [
         new TypedItem('Just some item', 0, defaultQuality),
-        new ItemAgeingWell('Aged Brie', 0, defaultQuality),
-        new ItemBackstagePass('Backstage passes to a TAFKAL80ETC concert', 0, defaultQuality),
+        new ItemAgeingWell('Aged Brie by Edo', 0, defaultQuality),
+        new ItemBackstagePass('Backstage passes to a concert', 0, defaultQuality),
         new ItemLegendary('Sulfuras, Hand of Ragnaros', 0, defaultQuality),
-        new ItemConjured('Conjured item - TODO', 0, defaultQuality)
+        new ItemConjured('Conjured item you should not want', 0, defaultQuality)
     ];
 
     describe('General item setup', function () {
@@ -54,6 +54,7 @@ describe('Gilded Rose', function () {
 
         it('NORMAL items should end up in the shop as initialised', function () {
             const items = gildedRose.items;
+            expect(items[0].type).to.equal(TypedItem.TYPES.NORMAL);
             expect(items[0].name).to.equal('Just some item');
             expect(items[0].sellIn).to.equal(defaultSellIn);
             expect(items[0].quality).to.equal(defaultQuality);
@@ -61,9 +62,21 @@ describe('Gilded Rose', function () {
 
         it('SPECIAL items should end up in the shop as initialised', function () {
             const items = gildedRose.items;
-            expect(items[1].name).to.equal('Aged Brie');
+
+            // TODO: split into separate tests. Lot of expectations to go wrong for less obvious reasons.
+            expect(items[1].type).to.equal(TypedItem.TYPES.AGEING_WELL);
+            expect(items[2].type).to.equal(TypedItem.TYPES.BACKSTAGE_PASS);
+            expect(items[3].type).to.equal(TypedItem.TYPES.LEGENDARY);
+            expect(items[4].type).to.equal(TypedItem.TYPES.CONJURED);
+            expect(items[1].name).to.equal('Aged Brie by Edo');
             expect(items[1].sellIn).to.equal(defaultSellIn);
             expect(items[1].quality).to.equal(defaultQuality);
+            expect(items[2].sellIn).to.equal(defaultSellIn);
+            expect(items[2].quality).to.equal(defaultQuality);
+            expect(items[3].sellIn).to.equal(defaultSellIn);
+            expect(items[3].quality).to.equal(defaultQuality);
+            expect(items[4].sellIn).to.equal(defaultSellIn);
+            expect(items[4].quality).to.equal(defaultQuality);
         });
 
     });
@@ -217,6 +230,17 @@ describe('Gilded Rose', function () {
             });
         });
 
+        describe('Conjured items', function () {
+            beforeEach(function () {
+                gildedRose = new ShopWrapper(defaultShopInventory());
+            });
+
+            it('will see their quality decay twice the rate of normal items (i.e. 2)', function () {
+                let updatedItems = gildedRose.updateQuality();
+                expect(updatedItems[4].quality).to.equal(defaultQuality - 2);
+            });
+        });
+
     });
 
     describe('sellIn values expiring', function () {
@@ -284,6 +308,17 @@ describe('Gilded Rose', function () {
                 updatedItems = gildedRose.updateQuality();
                 expect(updatedItems[3].sellIn).to.equal(0);
                 expect(updatedItems[3].quality).to.equal(defaultQuality);
+            });
+        });
+
+        describe('Conjured items', function () {
+            beforeEach(function () {
+                gildedRose = new ShopWrapper(shopInventoryAllAtDueDate());
+            });
+
+            it('will see their quality decay twice the rate of normal items after expiry (i.e. 4)', function () {
+                let updatedItems = gildedRose.updateQuality();
+                expect(updatedItems[4].quality).to.equal(defaultQuality - 4);
             });
         });
 
