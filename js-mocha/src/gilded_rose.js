@@ -12,13 +12,15 @@ class TypedItem extends Item {
 
     // these aren't strictly necessary, since where not using the type for the conditions any more
     // nor is setting the type in the subclasses
-    static TYPES = {
-        NORMAL: 0,
-        AGEING_WELL: 1,
-        BACKSTAGE_PASS: 2,
-        LEGENDARY: 3,
-        CONJURED: 4
-    };
+    static get TYPES() {
+        return Object.freeze({
+            NORMAL: 0,
+            AGEING_WELL: 1,
+            BACKSTAGE_PASS: 2,
+            LEGENDARY: 3,
+            CONJURED: 4
+        });
+    }
 
     constructor(name, sellIn = Infinity, quality = 0, type = TypedItem.TYPES.NORMAL) {
         super(name, sellIn, quality);
@@ -26,10 +28,10 @@ class TypedItem extends Item {
     }
 
     update() {
-        this.updateSellIn();
         this.updateQuality();
         this.limitQualityBottom();
         this.limitQualityTop();
+        this.updateSellIn();
     }
 
     updateSellIn() {
@@ -38,6 +40,10 @@ class TypedItem extends Item {
 
     updateQuality() {
         this.quality--;
+
+        if (this.sellIn <= 0) {
+            this.quality--;
+        }
     }
 
     limitQualityBottom() {
@@ -57,6 +63,10 @@ class ItemAgeingWell extends TypedItem {
 
     updateQuality() {
         this.quality++;
+
+        if (this.sellIn <= 0) {
+            this.quality++;
+        }
     }
 }
 
@@ -66,14 +76,28 @@ class ItemBackstagePass extends TypedItem {
     }
 
     updateQuality() {
+        if (this.sellIn <= 0) {
+            this.quality = 0;
+            return;
+        }
+
         this.quality++;
-        // TODO: implement different increases/settings for different sellIn ranges
+        if (this.sellIn <= 10) {
+            this.quality++;
+        }
+        if (this.sellIn <= 5) {
+            this.quality++;
+        }
     }
 }
 
 class ItemLegendary extends TypedItem {
     constructor(name, sellIn, quality) {
         super(name, sellIn, quality, TypedItem.TYPES.LEGENDARY);
+    }
+
+    updateQuality() {
+        // noop();
     }
 
     updateSellIn() {

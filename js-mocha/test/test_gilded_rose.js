@@ -1,5 +1,13 @@
 var {expect} = require('chai');
-var {Shop, Item, Logger} = require('../src/gilded_rose.js');
+var {
+    Shop,
+    TypedItem,
+    ItemAgeingWell,
+    ItemBackstagePass,
+    ItemLegendary,
+    ItemConjured,
+    Logger
+} = require('../src/gilded_rose.js');
 
 class ShopWrapper extends Shop {
     constructor(items) {
@@ -24,19 +32,19 @@ describe('Gilded Rose', function () {
     const defaultSellIn = 10;
     const defaultQuality = 5;
     const defaultShopInventory = () => [
-        new Item('Just some item', defaultSellIn, defaultQuality),
-        new Item('Aged Brie', defaultSellIn, defaultQuality),
-        new Item('Backstage passes to a TAFKAL80ETC concert', defaultSellIn, defaultQuality),
-        new Item('Sulfuras, Hand of Ragnaros', defaultSellIn, defaultQuality),
-        new Item('Conjured item - TODO', defaultSellIn, defaultQuality)
+        new TypedItem('Just some item', defaultSellIn, defaultQuality),
+        new ItemAgeingWell('Aged Brie', defaultSellIn, defaultQuality),
+        new ItemBackstagePass('Backstage passes to a TAFKAL80ETC concert', defaultSellIn, defaultQuality),
+        new ItemLegendary('Sulfuras, Hand of Ragnaros', defaultSellIn, defaultQuality),
+        new ItemConjured('Conjured item - TODO', defaultSellIn, defaultQuality)
     ];
 
     const shopInventoryAllAtDueDate = () => [
-        new Item('Just some item', 0, defaultQuality),
-        new Item('Aged Brie', 0, defaultQuality),
-        new Item('Backstage passes to a TAFKAL80ETC concert', 0, defaultQuality),
-        new Item('Sulfuras, Hand of Ragnaros', 0, defaultQuality),
-        new Item('Conjured item - TODO', 0, defaultQuality)
+        new TypedItem('Just some item', 0, defaultQuality),
+        new ItemAgeingWell('Aged Brie', 0, defaultQuality),
+        new ItemBackstagePass('Backstage passes to a TAFKAL80ETC concert', 0, defaultQuality),
+        new ItemLegendary('Sulfuras, Hand of Ragnaros', 0, defaultQuality),
+        new ItemConjured('Conjured item - TODO', 0, defaultQuality)
     ];
 
     describe('General item setup', function () {
@@ -44,7 +52,7 @@ describe('Gilded Rose', function () {
             gildedRose = new ShopWrapper(defaultShopInventory());
         });
 
-        it('REGULAR items should end up in the shop as initialised', function () {
+        it('NORMAL items should end up in the shop as initialised', function () {
             const items = gildedRose.items;
             expect(items[0].name).to.equal('Just some item');
             expect(items[0].sellIn).to.equal(defaultSellIn);
@@ -62,7 +70,7 @@ describe('Gilded Rose', function () {
 
     describe('normal sellIn values', function () {
 
-        describe('REGULAR items', function () {
+        describe('NORMAL items', function () {
 
             beforeEach(function () {
                 gildedRose = new ShopWrapper(defaultShopInventory());
@@ -113,13 +121,14 @@ describe('Gilded Rose', function () {
             });
 
             it('will not increase in quality beyond 50', function () {
-                gildedRose = new ShopWrapper([new Item('Aged Brie', 20, 49), new Item('Backstage passes to a TAFKAL80ETC concert', 20, 49)]);
+                gildedRose.items[1].quality = 49;
+                gildedRose.items[2].quality = 49;
                 let updatedItems = gildedRose.updateQuality();
-                expect(updatedItems[0].quality).to.equal(50);
                 expect(updatedItems[1].quality).to.equal(50);
+                expect(updatedItems[2].quality).to.equal(50);
                 updatedItems = gildedRose.updateQuality();
-                expect(updatedItems[0].quality).to.equal(50);
                 expect(updatedItems[1].quality).to.equal(50);
+                expect(updatedItems[2].quality).to.equal(50);
             });
         });
 
@@ -128,7 +137,7 @@ describe('Gilded Rose', function () {
                 gildedRose = new ShopWrapper(defaultShopInventory());
             });
 
-            it('will increase in quality by 1 when sellIn <= 10 and sellIn >=6', function() {
+            it('will increase in quality by 1 when sellIn <= 10 and sellIn >=6', function () {
                 gildedRose.items[1].sellIn = 10;
                 let updatedItems = gildedRose.updateQuality();
                 // 10
@@ -141,10 +150,9 @@ describe('Gilded Rose', function () {
                 updatedItems = gildedRose.updateQuality();
                 // 6
                 expect(updatedItems[1].quality).to.equal(defaultQuality + (5 * 1));
-                expect(updatedItems[1].quality).to.equal(defaultQuality + (5 * 1));
             });
 
-            it('will increase in quality by 1 when sellIn <= 5 and sellIn >= 1', function() {
+            it('will increase in quality by 1 when sellIn <= 5 and sellIn >= 1', function () {
                 gildedRose.items[1].sellIn = 5;
                 let updatedItems = gildedRose.updateQuality();
                 // 5
@@ -165,7 +173,7 @@ describe('Gilded Rose', function () {
                 gildedRose = new ShopWrapper(defaultShopInventory());
             });
 
-            it('will increase in quality by 2 when sellIn <= 10 and sellIn >=6', function() {
+            it('will increase in quality by 2 when sellIn <= 10 and sellIn >=6', function () {
                 gildedRose.items[2].sellIn = 10;
                 let updatedItems = gildedRose.updateQuality();
                 // 10
@@ -180,7 +188,7 @@ describe('Gilded Rose', function () {
                 expect(updatedItems[2].quality).to.equal(defaultQuality + (5 * 2));
             });
 
-            it('will increase in quality by 3 when sellIn <= 5 and sellIn >= 1', function() {
+            it('will increase in quality by 3 when sellIn <= 5 and sellIn >= 1', function () {
                 gildedRose.items[2].sellIn = 5;
                 let updatedItems = gildedRose.updateQuality();
                 // 5
@@ -213,7 +221,7 @@ describe('Gilded Rose', function () {
 
     describe('sellIn values expiring', function () {
 
-        describe('REGULAR items', function () {
+        describe('NORMAL items', function () {
 
             beforeEach(function () {
                 gildedRose = new ShopWrapper(shopInventoryAllAtDueDate());
